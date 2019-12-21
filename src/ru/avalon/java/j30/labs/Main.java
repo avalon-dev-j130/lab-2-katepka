@@ -1,6 +1,9 @@
 package ru.avalon.java.j30.labs;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Properties;
@@ -21,7 +24,7 @@ public class Main {
      * 
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException, IOException {
         /*
          * TODO #01 Подключите к проекту все библиотеки, необходимые для соединения с СУБД.
          */
@@ -55,11 +58,11 @@ public class Main {
      * 
      * @return URL в виде объекта класса {@link String}
      */
-    private static String getUrl() {
+    private static String getUrl() throws IOException {
         /*
          * TODO #02 Реализуйте метод getUrl
          */
-        throw new UnsupportedOperationException("Not implemented yet!");
+        return getProperties().getProperty("url");
     }
     /**
      * Возвращает параметры соединения
@@ -67,11 +70,15 @@ public class Main {
      * @return Объект класса {@link Properties}, содержащий параметры user и 
      * password
      */
-    private static Properties getProperties() {
+    private static Properties getProperties() throws IOException {
         /*
          * TODO #03 Реализуйте метод getProperties
          */
-        throw new UnsupportedOperationException("Not implemented yet!");
+        Properties properties = new Properties();
+        try (InputStream in = ClassLoader.getSystemResourceAsStream("resources/database.properties")) {
+            properties.load(in);
+            return properties;
+        }
     }
     /**
      * Возвращает соединение с базой данных Sample
@@ -79,11 +86,14 @@ public class Main {
      * @return объект типа {@link Connection}
      * @throws SQLException 
      */
-    private static Connection getConnection() throws SQLException {
+    private static Connection getConnection() throws SQLException, IOException {
         /*
          * TODO #04 Реализуйте метод getConnection
          */
-        throw new UnsupportedOperationException("Not implemented yet!");
+        String url = getUrl();
+        String user = getProperties().getProperty("user");
+        String password = getProperties().getProperty("password");
+        return DriverManager.getConnection(url, user, password);
     }
     
 }
