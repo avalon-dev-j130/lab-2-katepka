@@ -32,3 +32,4 @@ derby.properties
 derby.log
 build.xml
 nbproject/
+/build/

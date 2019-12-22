@@ -1,7 +1,9 @@
 package ru.avalon.java.j30.labs;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Objects;
 
 /**
@@ -45,9 +47,6 @@ public class ProductCode {
         /*
          * TODO #05 реализуйте конструктор класса ProductCode
          */
-        code = set.getString("PROD_CODE");
-        discountCode = set.getString("DISCOUNT_CODE").charAt(0);
-        description = set.getString("DESCRIPTION");
     }
     /**
      * Возвращает код товара
@@ -108,7 +107,7 @@ public class ProductCode {
         /*
          * TODO #06 Реализуйте метод hashCode
          */
-        return Objects.hash(code, description);
+        return Objects.hash(code, discountCode, description);
     }
     /**
      * Сравнивает некоторый произвольный объект с текущим объектом типа 
@@ -141,7 +140,7 @@ public class ProductCode {
         /*
          * TODO #08 Реализуйте метод toString
          */
-        return "Code: " + code + "; Discount code: " + discountCode + "; Description: " + description;
+        return "Code: " + code + " | Discount code: " + discountCode + " | Description: " + description;
     }
     /**
      * Возвращает запрос на выбор всех записей из таблицы PRODUCT_CODE 
@@ -155,10 +154,8 @@ public class ProductCode {
          * TODO #09 Реализуйте метод getSelectQuery
          */
         String query = "SELECT * FROM PRODUCT_CODE";
-        try (Statement statement = connection.createStatement()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            return preparedStatement;
-        }
+        PreparedStatement preparedStatement = connection.prepareStatement(query); 
+        return preparedStatement;
     }
     /**
      * Возвращает запрос на добавление записи в таблицу PRODUCT_CODE 
@@ -171,12 +168,10 @@ public class ProductCode {
         /*
          * TODO #10 Реализуйте метод getInsertQuery
          */
-        String query = "INSERT INTO PRODUCT_CODE (CODE, DISCOUNT_CODE, DESCRIPTION)"
-                + "VALUES (,,)";
-        try (Statement statement = connection.createStatement()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            return preparedStatement;
-        }
+        String query = "INSERT INTO PRODUCT_CODE (PROD_CODE, DISCOUNT_CODE, DESCRIPTION)"
+                     + "VALUES (?, ?, ?)";
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+        return preparedStatement;
     }
     /**
      * Возвращает запрос на обновление значений записи в таблице PRODUCT_CODE 
@@ -189,7 +184,13 @@ public class ProductCode {
         /*
          * TODO #11 Реализуйте метод getUpdateQuery
          */
-        throw new UnsupportedOperationException("Not implemented yet!");
+        String query = "UPDATE PRODUCT_CODE SET PROD_CODE = ?"
+                                             + "DISCOUNT_CODE = ?, "
+                                             + "DESCRIPTION = ? "
+                                             + "WHERE PROD_CODE = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+        return preparedStatement;
+        
     }
     /**
      * Преобразует {@link ResultSet} в коллекцию объектов типа {@link ProductCode}
@@ -203,7 +204,14 @@ public class ProductCode {
         /*
          * TODO #12 Реализуйте метод convert
          */
-        throw new UnsupportedOperationException("Not implemented yet!");
+        Collection<ProductCode> collection = new LinkedList<>();
+        while (set.next()) {
+            String code = set.getString("PROD_CODE");
+            String discountCode = set.getString("DISCOUNT_CODE");
+            String description = set.getString("DESCRIPTION");
+            collection.add(new ProductCode(code, discountCode.charAt(0), description));
+        }
+        return new ArrayList<ProductCode>(collection);
     }
     /**
      * Сохраняет текущий объект в базе данных. 
@@ -218,7 +226,30 @@ public class ProductCode {
         /*
          * TODO #13 Реализуйте метод convert
          */
-        throw new UnsupportedOperationException("Not implemented yet!");
+        String selectQuery = "SELECT * FROM PRODUCT_CODE WHERE PROD_CODE = '" + this.code + "'";
+        try (Statement statement = connection.createStatement()) {
+            try (ResultSet resultSet = statement.executeQuery(selectQuery)) {
+                while (resultSet.next()) {
+                    System.out.println(resultSet.getString("PROD_CODE"));
+                }
+                if (!resultSet.next()) {
+                    System.out.println("ras");
+                    PreparedStatement ps = getInsertQuery(connection);
+                    ps.setString(1, code);
+                    ps.setString(2, String.valueOf(discountCode));
+                    ps.setString(3, description);
+                    ps.execute();
+                } else {
+                    System.out.println("dvas");
+                    PreparedStatement ps = getUpdateQuery(connection);
+                    ps.setString(1, String.valueOf(code));
+                    ps.setString(2, String.valueOf(discountCode));
+                    ps.setString(3, description);
+                    ps.setString(4, code);
+                    ps.executeUpdate();
+                }
+            }
+        }
     }
     /**
      * Возвращает все записи таблицы PRODUCT_CODE в виде коллекции объектов
