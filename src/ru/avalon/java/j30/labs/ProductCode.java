@@ -47,6 +47,9 @@ public class ProductCode {
         /*
          * TODO #05 реализуйте конструктор класса ProductCode
          */
+        code = set.getString("PROD_CODE");
+        discountCode = set.getString("DISCOUNT_CODE").charAt(0);
+        description = set.getString("DESCRIPTION");
     }
     /**
      * Возвращает код товара
