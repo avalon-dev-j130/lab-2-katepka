@@ -1,7 +1,6 @@
 package ru.avalon.java.j30.labs;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -33,6 +32,8 @@ public class Main {
             code.save(connection);
             printAllCodes(connection);
 
+            System.out.println("===============================================");
+            
             code.setCode("MV");
             code.save(connection);
             printAllCodes(connection);
@@ -47,7 +48,7 @@ public class Main {
      * @param connection действительное соединение с базой данных
      * @throws SQLException 
      */    
-    private static void printAllCodes(Connection connection) throws SQLException {
+    private static void printAllCodes(Connection connection) throws SQLException, IOException {
         Collection<ProductCode> codes = ProductCode.all(connection);
         for (ProductCode code : codes) {
             System.out.println(code);
