@@ -5,12 +5,22 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+/**
+ * QueriesManager помогает работать с SQL-запросами:
+ * парсит ресурс с запросами в HashMap<Название запроса, Текст запроса>,
+ * возвращает PrepareStatement по названию запроса
+ */
 public class QueriesManager {
-
+    
     private static final String queriesPath = "resources/queries.sql";
+    /**
+     * Хранит считанные запросы в виде <Название запроса, Текст запроса>
+     */
+    public static HashMap<String, String> sql = null;
 
     private QueriesManager() {
     }
+    
 
     /**
      * Читает текст файла с запросами
@@ -34,6 +44,7 @@ public class QueriesManager {
             return sqlLines;
         }
     }
+        
 
     /**
      * Разбирает строку с запросами в HashMap<Название запроса, Запрос>
@@ -61,7 +72,6 @@ public class QueriesManager {
                     sql.put(key, value.toString());
                     value.delete(0, value.length());
                 }
-
             }
         }
         return sql;
@@ -75,7 +85,10 @@ public class QueriesManager {
      * @throws SQLException 
      */
     public static PreparedStatement getPreparedStatement(Connection connection, String queryName) throws IOException, SQLException {
-        String query = parseQueries(getSQLLines()).get(queryName).replace(";", "");
+        if (sql == null) {
+            sql = parseQueries(getSQLLines());
+        }
+        String query = sql.get(queryName).replace(";", "");
         PreparedStatement preparedStatement = connection.prepareStatement(query);
         return preparedStatement;
     }
